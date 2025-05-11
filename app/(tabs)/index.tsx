@@ -1,16 +1,56 @@
+import { View, Text, StyleSheet, FlatList, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { useRouter } from 'expo-router';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { useEffect, useState } from 'react';
 
-export default function HomeScreen() {
+export default function CategoriesScreen() {
   const router = useRouter();
+  const [categories, setCategories] = useState<string[]>([]);
+  const [loading, setLoading] = useState(true);
 
+  // 🔄 Fetch product categories on initial load
+  useEffect(() => {
+    fetch('https://fakestoreapi.com/products/categories')
+      .then((response) => response.json())
+      .then((data) => {
+        setCategories(data);
+        setLoading(false);
+      })
+      .catch((error) => {
+        console.error('Error fetching categories:', error);
+        setLoading(false);
+      });
+  }, []);
+
+  // ⏳ Show loading indicator while fetching
+  if (loading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#4CAF50" />
+      </View>
+    );
+  }
+
+  // 📋 Display list of category buttons
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Fake Store</Text>
+      <Text style={styles.title}>Categories</Text>
 
-      <TouchableOpacity style={styles.button} onPress={() => router.push('/categories')}>
-        <Text style={styles.buttonText}>View Categories</Text>
-      </TouchableOpacity>
+      <FlatList
+        data={categories}
+        keyExtractor={(item) => item}
+        renderItem={({ item }) => (
+          <TouchableOpacity
+            style={styles.categoryButton}
+            onPress={() => router.push({
+              pathname: '/products/[category]',
+              params: { category: item },
+            })}
+          >
+            <Text style={styles.categoryText}>{item}</Text>
+          </TouchableOpacity>
+        )}
+        contentContainerStyle={styles.list}
+      />
     </View>
   );
 }
@@ -18,22 +58,34 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    paddingTop: 60,
     backgroundColor: '#fff',
+    alignItems: 'center',
   },
   title: {
     fontSize: 32,
     fontWeight: 'bold',
     marginBottom: 20,
   },
-  button: {
-    backgroundColor: '#4CAF50',
-    padding: 12,
-    borderRadius: 8,
+  list: {
+    paddingHorizontal: 20,
   },
-  buttonText: {
-    color: '#fff',
-    fontSize: 18,
+  categoryButton: {
+    backgroundColor: '#E0F7FA',
+    padding: 15,
+    borderRadius: 10,
+    marginVertical: 8,
+    alignItems: 'center',
+    width: 300,
+  },
+  categoryText: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#00796B',
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });

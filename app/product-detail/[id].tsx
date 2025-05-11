@@ -1,6 +1,17 @@
-import { View, Text, Image, StyleSheet, ActivityIndicator, TouchableOpacity, ScrollView } from 'react-native';
+import {
+  View,
+  Text,
+  Image,
+  StyleSheet,
+  ActivityIndicator,
+  TouchableOpacity,
+  ScrollView,
+  ToastAndroid,
+} from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
+import { useDispatch } from 'react-redux';
+import { addToCart } from '../../features/cart/cartSlice';
 
 interface Product {
   id: number;
@@ -13,9 +24,11 @@ interface Product {
 export default function ProductDetailScreen() {
   const { id } = useLocalSearchParams();
   const router = useRouter();
+  const dispatch = useDispatch();
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
 
+  // Fetch product data when the screen loads
   useEffect(() => {
     if (id) {
       fetch(`https://fakestoreapi.com/products/${id}`)
@@ -30,6 +43,14 @@ export default function ProductDetailScreen() {
         });
     }
   }, [id]);
+
+  // Handle add-to-cart button
+  const handleAddToCart = () => {
+    if (product) {
+      dispatch(addToCart({ ...product, quantity: 1 }));
+      ToastAndroid.show('✅ Added to cart!', ToastAndroid.SHORT);
+    }
+  };
 
   if (loading) {
     return (
@@ -54,7 +75,7 @@ export default function ProductDetailScreen() {
       <Text style={styles.price}>Price: ${product.price}</Text>
       <Text style={styles.description}>{product.description}</Text>
 
-      <TouchableOpacity style={styles.cartButton}>
+      <TouchableOpacity style={styles.cartButton} onPress={handleAddToCart}>
         <Text style={styles.cartButtonText}>Add to Cart</Text>
       </TouchableOpacity>
 
