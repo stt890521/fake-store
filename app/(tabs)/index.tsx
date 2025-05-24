@@ -1,91 +1,33 @@
-import { View, Text, StyleSheet, FlatList, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { useEffect } from 'react';
+import { View, ActivityIndicator } from 'react-native';
 import { useRouter } from 'expo-router';
-import { useEffect, useState } from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
-export default function CategoriesScreen() {
+export default function Index() {
   const router = useRouter();
-  const [categories, setCategories] = useState<string[]>([]);
-  const [loading, setLoading] = useState(true);
 
-  // 🔄 Fetch product categories on initial load
   useEffect(() => {
-    fetch('https://fakestoreapi.com/products/categories')
-      .then((response) => response.json())
-      .then((data) => {
-        setCategories(data);
-        setLoading(false);
-      })
-      .catch((error) => {
-        console.error('Error fetching categories:', error);
-        setLoading(false);
-      });
+    const checkLogin = async () => {
+      try {
+        const user = await AsyncStorage.getItem('user');
+
+        if (user) {
+          router.replace('/(tabs)/product'); // 已登入導向首頁
+        } else {
+          router.replace('/login'); // 未登入導向登入頁
+        }
+      } catch (error) {
+        console.error('Error checking login:', error);
+        router.replace('/login');
+      }
+    };
+
+    checkLogin();
   }, []);
 
-  // ⏳ Show loading indicator while fetching
-  if (loading) {
-    return (
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#4CAF50" />
-      </View>
-    );
-  }
-
-  // 📋 Display list of category buttons
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Categories</Text>
-
-      <FlatList
-        data={categories}
-        keyExtractor={(item) => item}
-        renderItem={({ item }) => (
-          <TouchableOpacity
-            style={styles.categoryButton}
-            onPress={() => router.push({
-              pathname: '/products/[category]',
-              params: { category: item },
-            })}
-          >
-            <Text style={styles.categoryText}>{item}</Text>
-          </TouchableOpacity>
-        )}
-        contentContainerStyle={styles.list}
-      />
+    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+      <ActivityIndicator size="large" />
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    paddingTop: 60,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-  },
-  title: {
-    fontSize: 32,
-    fontWeight: 'bold',
-    marginBottom: 20,
-  },
-  list: {
-    paddingHorizontal: 20,
-  },
-  categoryButton: {
-    backgroundColor: '#E0F7FA',
-    padding: 15,
-    borderRadius: 10,
-    marginVertical: 8,
-    alignItems: 'center',
-    width: 300,
-  },
-  categoryText: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#00796B',
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-});

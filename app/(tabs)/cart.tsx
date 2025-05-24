@@ -1,3 +1,4 @@
+import React from 'react';
 import {
   View,
   Text,
@@ -11,6 +12,7 @@ import { RootState } from '../../store';
 import {
   increaseQuantity,
   decreaseQuantity,
+  clearCart,
 } from '../../features/cart/cartSlice';
 
 export default function CartScreen() {
@@ -19,7 +21,7 @@ export default function CartScreen() {
 
   const totalItems = cartItems.reduce((sum, item) => sum + item.quantity, 0);
   const totalPrice = cartItems
-    .reduce((sum, item) => sum + item.price * item.quantity, 0)
+    .reduce((sum, item) => sum + item.quantity * item.price, 0)
     .toFixed(2);
 
   const renderItem = ({ item }: any) => (
@@ -32,7 +34,7 @@ export default function CartScreen() {
           <TouchableOpacity onPress={() => dispatch(decreaseQuantity(item.id))}>
             <Text style={styles.controlBtn}>➖</Text>
           </TouchableOpacity>
-          <Text style={styles.quantity}>quantity: {item.quantity}</Text>
+          <Text style={styles.quantity}>Qty: {item.quantity}</Text>
           <TouchableOpacity onPress={() => dispatch(increaseQuantity(item.id))}>
             <Text style={styles.controlBtn}>➕</Text>
           </TouchableOpacity>
@@ -44,12 +46,12 @@ export default function CartScreen() {
   return (
     <View style={styles.container}>
       {cartItems.length === 0 ? (
-        <Text style={styles.empty}>Your cart is empty!!!</Text>
+        <Text style={styles.empty}>Your cart is empty.</Text>
       ) : (
         <>
           <View style={styles.summary}>
             <Text style={styles.summaryText}>Items: {totalItems}</Text>
-            <Text style={styles.summaryText}>Total Price: ${totalPrice}</Text>
+            <Text style={styles.summaryText}>Total: ${totalPrice}</Text>
           </View>
           <FlatList
             data={cartItems}
@@ -57,6 +59,12 @@ export default function CartScreen() {
             renderItem={renderItem}
             contentContainerStyle={{ paddingBottom: 20 }}
           />
+          <TouchableOpacity
+            style={styles.clearButton}
+            onPress={() => dispatch(clearCart())}
+          >
+            <Text style={styles.clearButtonText}>Clear Cart</Text>
+          </TouchableOpacity>
         </>
       )}
     </View>
@@ -65,9 +73,18 @@ export default function CartScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, padding: 20, backgroundColor: '#fff' },
-  summary: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 10 },
+  summary: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 10,
+  },
   summaryText: { fontSize: 18, fontWeight: 'bold' },
-  empty: { textAlign: 'center', marginTop: 50, fontSize: 20, color: '#888' },
+  empty: {
+    textAlign: 'center',
+    marginTop: 50,
+    fontSize: 20,
+    color: '#888',
+  },
   itemContainer: {
     flexDirection: 'row',
     marginBottom: 15,
@@ -81,4 +98,12 @@ const styles = StyleSheet.create({
   controls: { flexDirection: 'row', alignItems: 'center', marginTop: 8 },
   controlBtn: { fontSize: 20, paddingHorizontal: 10 },
   quantity: { fontSize: 16, marginHorizontal: 10 },
+  clearButton: {
+    backgroundColor: '#f44336',
+    padding: 12,
+    borderRadius: 8,
+    marginTop: 10,
+    alignItems: 'center',
+  },
+  clearButtonText: { color: '#fff', fontWeight: 'bold', fontSize: 16 },
 });

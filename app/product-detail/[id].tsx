@@ -1,3 +1,4 @@
+import React, { useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -6,10 +7,9 @@ import {
   ActivityIndicator,
   TouchableOpacity,
   ScrollView,
-  ToastAndroid,
+  Alert,
 } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { addToCart } from '../../features/cart/cartSlice';
 
@@ -28,33 +28,31 @@ export default function ProductDetailScreen() {
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // Fetch product data when the screen loads
   useEffect(() => {
     if (id) {
       fetch(`https://fakestoreapi.com/products/${id}`)
-        .then((response) => response.json())
+        .then((res) => res.json())
         .then((data) => {
           setProduct(data);
           setLoading(false);
         })
-        .catch((error) => {
-          console.error('Error fetching product:', error);
+        .catch((err) => {
+          console.error('Error fetching product:', err);
           setLoading(false);
         });
     }
   }, [id]);
 
-  // Handle add-to-cart button
   const handleAddToCart = () => {
     if (product) {
       dispatch(addToCart({ ...product, quantity: 1 }));
-      ToastAndroid.show('✅ Added to cart!', ToastAndroid.SHORT);
+      Alert.alert('Success', 'Product added to cart!');
     }
   };
 
   if (loading) {
     return (
-      <View style={styles.loadingContainer}>
+      <View style={styles.center}>
         <ActivityIndicator size="large" color="#4CAF50" />
       </View>
     );
@@ -62,7 +60,7 @@ export default function ProductDetailScreen() {
 
   if (!product) {
     return (
-      <View style={styles.loadingContainer}>
+      <View style={styles.center}>
         <Text>Product not found.</Text>
       </View>
     );
@@ -70,13 +68,13 @@ export default function ProductDetailScreen() {
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      <Image source={{ uri: product.image }} style={styles.productImage} />
+      <Image source={{ uri: product.image }} style={styles.image} />
       <Text style={styles.title}>{product.title}</Text>
-      <Text style={styles.price}>Price: ${product.price}</Text>
+      <Text style={styles.price}>${product.price}</Text>
       <Text style={styles.description}>{product.description}</Text>
 
-      <TouchableOpacity style={styles.cartButton} onPress={handleAddToCart}>
-        <Text style={styles.cartButtonText}>Add to Cart</Text>
+      <TouchableOpacity style={styles.button} onPress={handleAddToCart}>
+        <Text style={styles.buttonText}>Add to Cart</Text>
       </TouchableOpacity>
 
       <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
@@ -87,14 +85,19 @@ export default function ProductDetailScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flexGrow: 1, alignItems: 'center', padding: 20, backgroundColor: '#fff' },
-  productImage: { width: 200, height: 200, resizeMode: 'contain', marginBottom: 20 },
-  title: { fontSize: 24, fontWeight: 'bold', textAlign: 'center', marginBottom: 10 },
-  price: { fontSize: 20, color: '#4CAF50', marginBottom: 10 },
-  description: { fontSize: 16, color: '#555', marginBottom: 20, textAlign: 'center' },
-  cartButton: { backgroundColor: '#2196F3', padding: 15, borderRadius: 10, marginBottom: 10 },
-  cartButtonText: { color: '#fff', fontSize: 16 },
-  backButton: { backgroundColor: '#4CAF50', padding: 15, borderRadius: 10 },
-  backButtonText: { color: '#fff', fontSize: 16 },
-  loadingContainer: { flex: 1, justifyContent: 'center', alignItems: 'center' },
+  container: { padding: 20, alignItems: 'center', backgroundColor: '#fff' },
+  center: { flex: 1, justifyContent: 'center', alignItems: 'center' },
+  image: { width: 200, height: 200, resizeMode: 'contain', marginBottom: 20 },
+  title: { fontSize: 20, fontWeight: 'bold', textAlign: 'center', marginBottom: 10 },
+  price: { fontSize: 18, color: '#4CAF50', marginBottom: 10 },
+  description: { fontSize: 16, textAlign: 'center', marginBottom: 20 },
+  button: {
+    backgroundColor: '#2196F3',
+    padding: 12,
+    borderRadius: 8,
+    marginBottom: 10,
+  },
+  buttonText: { color: '#fff', fontSize: 16 },
+  backButton: { backgroundColor: '#ccc', padding: 10, borderRadius: 6 },
+  backButtonText: { color: '#000' },
 });

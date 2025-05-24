@@ -26,7 +26,7 @@ export default function TabsLayout() {
             let iconName: keyof typeof Ionicons.glyphMap = 'home-outline';
             if (route.name === 'index') iconName = 'home-outline';
             if (route.name === 'cart') iconName = 'cart-outline';
-            if (route.name === 'orders') iconName = 'list-outline';
+            if (route.name === 'product') iconName = 'cube-outline';
             if (route.name === 'profile') iconName = 'person-outline';
 
             return <Ionicons name={iconName} size={size} color={color} />;
@@ -34,7 +34,13 @@ export default function TabsLayout() {
           tabBarBadge:
             route.name === 'cart' && totalCount > 0 ? totalCount : undefined,
         })}
-      />
+      >
+        <Tabs.Screen name="index" options={{ title: 'Home' }} />
+        <Tabs.Screen name="cart" options={{ title: 'Cart' }} />
+        <Tabs.Screen name="product" options={{ title: 'Product' }} />
+        <Tabs.Screen name="profile" options={{ title: 'Profile' }} />
+      </Tabs>
+
       <StatusBar style="auto" />
     </>
   );
